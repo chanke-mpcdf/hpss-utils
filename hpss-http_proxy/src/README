@@ -1,0 +1,21 @@
+hpss-http-proxy
+===============
+
+
+A small binary exposing the hpss client api over http.
+This binary is authenticates itself towards HPSS by means
+of a kerberos or unix keytab on startup.
+Thereafter all access is done using this set of credentials.
+Authentication via http is not supported (and probably will never be)
+
+Type hpss-http-proxy -h for help.
+
+
+to access it from a telnet session do :
+
+GET /?action=ls&depth=1&flags=&newer=-1&older=-1 HTTP/1.1
+
+where / is the path you want to look at.
+
+See the python-hpss_proxy for a higher-level layer using this 
+http-interface to hpss.
