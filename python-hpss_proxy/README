@@ -1,0 +1,21 @@
+python-hpss_proxy
+=================
+
+A python module to interact with HPSS as a client.
+
+Prerequisites
+=============
+
+A running hpss-http_proxy.
+You need to know the ip-adress and the port of this proxy.
+
+
+Examples
+========
+
+Examples how this should be used are in examples and in the tests dir.
+
+A very raw example for telnet or ncat :
+"""
+GET /?action=ls&depth=2&flags=l&newer=-1&older=-1 HTTP/1.1
+"""
