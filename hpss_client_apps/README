@@ -1,0 +1,14 @@
+PLEASE READ
+
+Note: Example code is provided "as is" with no warranty.  It
+is to be used to demonstrate how to compile, link and use the
+HPSS client API.  The programs are not part of the official "HPSS"
+package and the user assumes all risk.
+
+
+
+Instructions for build example code
+
+Place code in a separate direcotry under "/opt/hpss/". The Makefile will then link
+to the Makefile.macros located in /opt/hpss and build the code for
+a particular OS.
