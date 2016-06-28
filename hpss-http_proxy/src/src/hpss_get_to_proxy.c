@@ -1,5 +1,5 @@
 /*!\file 
-*\brief read a file from HPSS and store it locally
+*\brief read a file from HPSS and store it locally on the proxy
 */
 #include <unistd.h>
 
@@ -41,7 +41,8 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 		fflush(serverInfo.LogFile);
 	}
 
-	evbuffer_add_printf(out_evb, "{ \"action\" : \"get_to_proxy\", ");
+	evbuffer_add_printf(out_evb, "{ ");
+        evbuffer_add_printf(out_evb, "\"action\" : \"get_to_proxy\", ");
 	/*
 	 * see if local file already exists 
 	 */
@@ -93,7 +94,6 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 		local_open_mode |= O_APPEND;
 
 	if ((fd = open(local_path, local_open_mode, posix_mode)) < 0) {
-		free(buf);
 		evbuffer_add_printf(out_evb, "\"errno\" : \"%d\", ", errno);
 		evbuffer_add_printf(out_evb,
 				    "\"errstr\" : \"could not open local file %s\", ",
@@ -106,7 +106,6 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 	 */
 	hfd = hpss_Open(escaped_path, O_RDONLY, 0, NULL, NULL, NULL);
 	if (hfd < 0) {
-		free(buf);
 		evbuffer_add_printf(out_evb, "\"errno\" : \"%d\", ", errno);
 		evbuffer_add_printf(out_evb,
 				    "\"errstr\" : \"cannot open hpss-path %s.\", ",
@@ -125,7 +124,6 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 		read = hpss_Read(hfd, buf, BUFSIZE);
 		if (read <= 0) {
 			rc = 5;
-			free(buf);
 			evbuffer_add_printf(out_evb, "\"errno\" : \"%d\", ",
 					    errno);
 			evbuffer_add_printf(out_evb,
@@ -139,7 +137,6 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 		written = write(fd, buf, read);
 		if (written != read) {
 			rc = 5;
-			free(buf);
 			evbuffer_add_printf(out_evb, "\"errno\" : \"%d\", ",
 					    errno);
 			evbuffer_add_printf(out_evb,
@@ -182,6 +179,11 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 	 */
 	if (escaped_path != given_path)
 		free(escaped_path);
+        /*
+         * free buffer, if allocation was successful
+         */
+        if (buf)
+            free(buf);
 
 	return rc;
 }
