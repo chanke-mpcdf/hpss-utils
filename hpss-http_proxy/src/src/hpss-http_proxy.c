@@ -20,7 +20,7 @@ char *rw_actions =
  * comma are required for the correct parsing. 
  */
 char *all_actions =
-    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_uda,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,";
+    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,";
 
 /*
  * ! \brief check given actions 
@@ -562,8 +562,8 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 		goto send_reply;
 	}
 
-	if (!strcmp(action, "get_uda")) {
-		rc = hpss_get_uda(out_evb, (char *)path, flags);
+	if (!strcmp(action, "get_udas")) {
+		rc = hpss_get_udas(out_evb, (char *)path, flags);
 		goto send_reply;
 	}
 

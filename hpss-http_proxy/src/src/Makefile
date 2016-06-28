@@ -25,7 +25,7 @@ LDFLAGS         = $(COMPFLAGS) $(RUNFLAGS)
 OBJ		= util.o utf8.o hpss_mkdir.o hpss_chmod.o hpss_rm.o hpss_ls.o \
 		  hpss_put_from_proxy.o hpss_get_to_proxy.o hpss_link.o hpss_stat.o \
 		  hpss_rename.o hpss_set_uda.o hpss_get_storage_info.o hpss_chown.o\
-		  hpss_get_uda.o hpss_del_uda.o
+		  hpss_get_udas.o hpss_del_uda.o
 
 PROG		= hpss-http_proxy
 
@@ -36,5 +36,5 @@ clean:;		/bin/rm -f *.o $(PROG)
 
 hpss-http_proxy:  hpss-http_proxy.o $(OBJ)
 	@echo "Linking $@"...
-	@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS) $(OBJ)
+	@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(OBJ) $(LIBS)
 
