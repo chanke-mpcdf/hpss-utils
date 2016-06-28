@@ -37,7 +37,7 @@ hpss_rename(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
-	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_link\", ");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_rename\", ");
 	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
 	evbuffer_add_printf(out_evb, "\"new_path\" : \"%s\", ",
 			    escaped_new_path);

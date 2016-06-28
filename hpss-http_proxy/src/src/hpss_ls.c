@@ -125,6 +125,7 @@ hpss_ls(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_ls\", ");
 	if ((rc = hpss_GetListAttrs(escaped_path, &AttrOut)) < 0) {
 		evbuffer_add_printf(out_evb, " \"errno\" : \"%d\", ", -rc);
 		evbuffer_add_printf(out_evb,

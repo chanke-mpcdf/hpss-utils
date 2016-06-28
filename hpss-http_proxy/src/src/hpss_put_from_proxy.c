@@ -1,5 +1,5 @@
 /*!\file 
-*\brief copy a file from the local fs into HPSS
+*\brief copy a file from the local fs of the proxy into HPSS
 */
 
 #include <unistd.h>
@@ -45,6 +45,7 @@ hpss_put_from_proxy(struct evbuffer *out_evb, char *given_path,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_put_from_proxy\", ");
 	/*
 	 * Set file COS based on argument passed or size of file 
 	 */

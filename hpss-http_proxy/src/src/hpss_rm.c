@@ -60,6 +60,7 @@ int hpss_rm(struct evbuffer *out_evb, char *given_path, const char *flags)
 	payload.flags = flags;
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_rm\", ");
 
 	if (serverInfo.LogLevel <= LL_TRACE) {
 		fprintf(serverInfo.LogFile,

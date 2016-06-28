@@ -99,6 +99,7 @@ int hpss_set_uda(struct evbuffer *out_evb, /**< [in] ev buffer */
 	 * we only take absolute XPath values (=Key)
 	 */
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_set_uda\", ");
 	if (key[0] != '/') {
 		if (serverInfo.LogLevel < LL_INFO)
 			fprintf(serverInfo.LogFile,

@@ -42,6 +42,7 @@ int hpss_mkdir(struct evbuffer *out_evb /**< [in] ev buffer */ ,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_mkdir\", ");
 	if (have_flag("p")) {
 		if (escaped_path[0] == '/')
 			strcpy(fullPath, "/");

@@ -34,6 +34,7 @@ int hpss_get_storage_info(struct evbuffer *out_evb, /**< [in] mongoose connectio
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_get_storage_info\", ");
 
 	/*
 	 * Get extended attributes of a file

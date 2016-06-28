@@ -104,6 +104,7 @@ hpss_stat(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_stat\", ");
 	rc = do_hpss_stat(out_evb, escaped_path, 0);
 
 	elapsed = double_time() - start;

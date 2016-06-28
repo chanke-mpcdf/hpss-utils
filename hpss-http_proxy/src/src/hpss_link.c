@@ -37,8 +37,8 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
-	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
 	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_link\", ");
+	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
 
 	if (!have_flag("s") && !have_flag("h")) {
 		rc = 2;

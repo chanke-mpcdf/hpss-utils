@@ -93,6 +93,7 @@ hpss_chmod(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_chmod\", ");
 
 	rc = do_hpss_chmod(out_evb, escaped_path, &payload, 0);
 
