@@ -23,7 +23,7 @@ int hpss_get_storage_info(struct evbuffer *out_evb,
 			  char *given_path, const char *flags);
 int hpss_rename(struct evbuffer *out_evb, char *given_path,
 		const char *flags, char *new_path);
-int hpss_get_uda(struct evbuffer *out_evb, char *given_path,
+int hpss_get_udas(struct evbuffer *out_evb, char *given_path,
 		  const char *flags);
 int hpss_set_uda(struct evbuffer *out_evb, char *given_path,
 		 const char *flags, char *key, char *value);

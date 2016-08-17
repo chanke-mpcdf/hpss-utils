@@ -8,27 +8,27 @@
 #include "util.h"
 #include "hpss_methods.h"
 
-struct hpss_get_uda_payload {
+struct hpss_get_udas_payload {
 	const char *flags;
 };
 
 /*
  * actual doing the job 
  */
-int do_hpss_get_uda(struct evbuffer *out_evb,	/**< [in] ev ouput buffer */
+int do_hpss_get_udas(struct evbuffer *out_evb,	/**< [in] ev ouput buffer */
 		     char *escaped_path,
 			/**<  [in] HPSS-path in ASCII encoding */
 		     void *payloadP,
-		    /**< [in] pointer to struct hpss_get_uda_payload */
+		    /**< [in] pointer to struct hpss_get_udas_payload */
 		     int enclosed_json
 		 /**< [in] flag if output as independent json-object */ )
 {
 
-	struct hpss_get_uda_payload *payload;
+	struct hpss_get_udas_payload *payload;
 	int hpss_flags = 0;
 	int rc = 0, i = 0;
 
-	payload = (struct hpss_get_uda_payload *)payloadP;
+	payload = (struct hpss_get_udas_payload *)payloadP;
 	hpss_userattr_list_t uda_list;
 	hpss_flags = XML_ATTR;
 	rc = hpss_UserAttrListAttrs(escaped_path, &uda_list, hpss_flags);
@@ -37,7 +37,7 @@ int do_hpss_get_uda(struct evbuffer *out_evb,	/**< [in] ev ouput buffer */
 		rc = -rc;
 	if (serverInfo.LogLevel < LL_DEBUG || rc != 0)
 		fprintf(serverInfo.LogFile,
-			"%s:%d:: hpss_get_uda(\"%s\", flags=%p) returned rc=%d\n",
+			"%s:%d:: hpss_get_udas(\"%s\", flags=%p) returned rc=%d\n",
 			__FILE__, __LINE__, escaped_path, payload->flags, rc);
 
 	if (enclosed_json) {
@@ -47,13 +47,13 @@ int do_hpss_get_uda(struct evbuffer *out_evb,	/**< [in] ev ouput buffer */
 		evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ",
 				    escaped_path);
 		evbuffer_add_printf(out_evb,
-				    "  \"errstr\" : \"Cannot get uda\"");
+				    "  \"errstr\" : \"Cannot get udas\"");
 		evbuffer_add_printf(out_evb, "  \"errno\" : \"%d\"", errno);
 		rc = 400;
 	} else {
 		evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ",
 				    escaped_path);
-		evbuffer_add_printf(out_evb, "\"uda\" : { ");
+		evbuffer_add_printf(out_evb, "\"udas\" : { ");
 		for (i = 0; i < uda_list.len; i++) {
 			/*
 			 * cut the automatically inserted prefixes out of the result 
@@ -78,7 +78,7 @@ int do_hpss_get_uda(struct evbuffer *out_evb,	/**< [in] ev ouput buffer */
 	return rc;
 }
 
-int hpss_get_uda(struct evbuffer *out_evb, /**< [in]  ev output buffer */
+int hpss_get_udas(struct evbuffer *out_evb, /**< [in]  ev output buffer */
 		  char *given_path,
 		      /**< [in] flags. Allowed here: "" */
 		  const char *flags /**< [in] flags. Allowed here: "" */ )
@@ -86,7 +86,7 @@ int hpss_get_uda(struct evbuffer *out_evb, /**< [in]  ev output buffer */
 
 	char *escaped_path;
 	int rc = 0;
-	struct hpss_get_uda_payload payload;
+	struct hpss_get_udas_payload payload;
 	double start, elapsed;
 
 	/*
@@ -103,7 +103,7 @@ int hpss_get_uda(struct evbuffer *out_evb, /**< [in]  ev output buffer */
 	}
 
 	evbuffer_add_printf(out_evb, "{");
-	rc = do_hpss_get_uda(out_evb, escaped_path, &payload, 0);
+	rc = do_hpss_get_udas(out_evb, escaped_path, &payload, 0);
 
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\"}", elapsed);
