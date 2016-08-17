@@ -37,16 +37,15 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"link\", ");
 	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
-	evbuffer_add_printf(out_evb, "\"action\" : \"hpss_link\", ");
 
 	if (!have_flag("s") && !have_flag("h")) {
 		rc = 2;
 		evbuffer_add_printf(out_evb,
 				    "  \"errstr\" : \"One of flags -h or -s required.\"");
 		evbuffer_add_printf(out_evb, "  \"errno\" : \"%d\"", rc);
-		evbuffer_add_printf(out_evb, "}");
-		return rc;
+		goto end;
 	}
 
 	if (have_flag("h")) {
@@ -57,12 +56,11 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 					    escaped_path, dest_path);
 			evbuffer_add_printf(out_evb, "  \"errno\" : \"%d\"",
 					    rc);
-			evbuffer_add_printf(out_evb, "}");
 			fprintf(serverInfo.LogFile,
 				"%s:%d:: hpss_Link(\"%s\",\"%s\") returned rc=%d\n",
 				__FILE__, __LINE__, escaped_path,
 				escaped_dest_path, -rc);
-			return rc;
+			goto end;
 		}
 	} else {
 		if ((rc = hpss_Symlink(escaped_path, escaped_dest_path)) < 0) {
@@ -72,15 +70,14 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 					    escaped_path, dest_path);
 			evbuffer_add_printf(out_evb, "  \"errno\" : \"%d\"",
 					    rc);
-			evbuffer_add_printf(out_evb, "}");
 			fprintf(serverInfo.LogFile,
 				"%s:%d:: hpss_Symlink(\"%s\",\"%s\") returned rc=%d\n",
 				__FILE__, __LINE__, escaped_path,
 				escaped_dest_path, -rc);
-			return rc;
+			goto end;
 		}
 	}
-
+end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\" }", elapsed);
 
