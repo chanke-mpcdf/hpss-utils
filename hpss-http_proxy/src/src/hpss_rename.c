@@ -70,5 +70,7 @@ hpss_rename(struct evbuffer *out_evb, char *given_path, const char *flags,
 	 */
 	if (escaped_path != given_path)
 		free(escaped_path);
+	if (escaped_new_path != new_path)
+		free(escaped_new_path);
 	return rc;
 }
