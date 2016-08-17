@@ -36,5 +36,5 @@ clean:;		/bin/rm -f *.o $(PROG)
 
 hpss-http_proxy:  hpss-http_proxy.o $(OBJ)
 	@echo "Linking $@"...
-	@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS) $(OBJ)
+	@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(OBJ) $(LIBS)
 
