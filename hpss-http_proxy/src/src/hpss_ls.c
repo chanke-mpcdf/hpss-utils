@@ -125,6 +125,7 @@ hpss_ls(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"ls\", ");
 	if ((rc = hpss_GetListAttrs(escaped_path, &AttrOut)) < 0) {
 		evbuffer_add_printf(out_evb, " \"errno\" : \"%d\", ", -rc);
 		evbuffer_add_printf(out_evb,
@@ -322,6 +323,7 @@ print_attributes(struct evbuffer *out_evb, const char *unescaped_path,
 	evbuffer_add_printf(out_evb, "\"gid\" : \"%d\", ", AttrOut.GID);
 	evbuffer_add_printf(out_evb, "\"cosid\" : \"%d\", ", AttrOut.COSId);
 	evbuffer_add_printf(out_evb, "\"account\" : \"%d\", ", AttrOut.Account);
+	evbuffer_add_printf(out_evb, "\"size\" : \"%lu\", ", AttrOut.DataLength);
 	evbuffer_add_printf(out_evb, "\"FamilyId\" : \"%d\", ",
 			    AttrOut.FamilyId);
 	evbuffer_add_printf(out_evb, "\"ctime\" : \"%d\", ",
