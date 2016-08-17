@@ -8,7 +8,7 @@
 #include "util.h"
 
 /*
- * ! \brief authenticate against HPSS with a kerberos keytab 
+ * ! \brief authenticate against HPSS with a kerberos or unix keytab
  */
 int authenticate(char *UserName, char *PathToKeytab, char *AuthMech)
 {
@@ -26,7 +26,7 @@ int authenticate(char *UserName, char *PathToKeytab, char *AuthMech)
 				fprintf(stderr, "Unknown authentication Mech : %s. Valid options are \"krb5\" and \"unix\".\n", AuthMech);
 				exit(1);
 			}
-			rc = hpss_SetLoginCred(UserName, hpss_authn_mech_krb5,
+			rc = hpss_SetLoginCred(UserName, hpss_authn_mech,
 					       hpss_rpc_cred_client,
 					       hpss_rpc_auth_type_keytab,
 					       PathToKeytab);
