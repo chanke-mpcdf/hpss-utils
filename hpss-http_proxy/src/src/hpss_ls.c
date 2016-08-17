@@ -96,6 +96,7 @@ hpss_ls(struct evbuffer *out_evb, char *given_path, const char *flags,
 	int max_recursion_level, int older, int newer)
 {
 	int rc;
+	char first_illegal_flag;
 	char *escaped_path;
 	struct hpss_ls_payload payload;
 	double start, elapsed;
@@ -126,6 +127,12 @@ hpss_ls(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	evbuffer_add_printf(out_evb, "{");
 	evbuffer_add_printf(out_evb, "\"action\" : \"ls\", ");
+	if ((first_illegal_flag = check_given_flags("lrX", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	if ((rc = hpss_GetListAttrs(escaped_path, &AttrOut)) < 0) {
 		evbuffer_add_printf(out_evb, " \"errno\" : \"%d\", ", -rc);
 		evbuffer_add_printf(out_evb,

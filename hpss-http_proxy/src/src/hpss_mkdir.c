@@ -22,6 +22,7 @@ int hpss_mkdir(struct evbuffer *out_evb /**< [in] ev buffer */ ,
 	char *saveptr;
 	char fullPath[1024];
 	int rc;
+	char first_illegal_flag;
 	double start, elapsed;
 	char *escaped_path;
 
@@ -42,6 +43,13 @@ int hpss_mkdir(struct evbuffer *out_evb /**< [in] ev buffer */ ,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"mkdir\", ");
+	if ((first_illegal_flag = check_given_flags("p", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	if (have_flag("p")) {
 		if (escaped_path[0] == '/')
 			strcpy(fullPath, "/");
@@ -84,6 +92,7 @@ int hpss_mkdir(struct evbuffer *out_evb /**< [in] ev buffer */ ,
 		}
 	}
 
+end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, " \"elapsed\" : \"%.3f\"}", elapsed);
 	if (serverInfo.LogLevel <= LL_TRACE) {

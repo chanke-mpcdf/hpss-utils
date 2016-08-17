@@ -1,5 +1,5 @@
 /*!\file 
-*\brief copy a file from the local fs into HPSS
+*\brief copy a file from the local fs of the proxy into HPSS
 */
 
 #include <unistd.h>
@@ -17,6 +17,7 @@ hpss_put_from_proxy(struct evbuffer *out_evb, char *given_path,
 	       const char *flags, char *local_path, char *mode_str, int cos_id)
 {
 	int rc;
+	char first_illegal_flag;
 	char *buf;
 	char *escaped_path;
 	int eof, len, written = 0, hfd, fd;
@@ -45,6 +46,13 @@ hpss_put_from_proxy(struct evbuffer *out_evb, char *given_path,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"put_from_proxy\", ");
+	if ((first_illegal_flag = check_given_flags("a", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	/*
 	 * Set file COS based on argument passed or size of file 
 	 */

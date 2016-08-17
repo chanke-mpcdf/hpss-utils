@@ -49,6 +49,7 @@ int hpss_rm(struct evbuffer *out_evb, char *given_path, const char *flags)
 
 	char *escaped_path;
 	int rc = 0;
+	char first_illegal_flag;
 	struct hpss_rm_payload payload;
 	double start, elapsed;
 
@@ -60,12 +61,19 @@ int hpss_rm(struct evbuffer *out_evb, char *given_path, const char *flags)
 	payload.flags = flags;
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"rm\", ");
 
 	if (serverInfo.LogLevel <= LL_TRACE) {
 		fprintf(serverInfo.LogFile,
 			"%s:%d:: Entering method with hpss_path=%s, flags=%s\n",
 			__FILE__, __LINE__, escaped_path, flags);
 		fflush(serverInfo.LogFile);
+	}
+	if ((first_illegal_flag = check_given_flags("r", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
 	}
 
 	rc = do_hpss_rm(out_evb, escaped_path, &payload, 0);
@@ -76,6 +84,7 @@ int hpss_rm(struct evbuffer *out_evb, char *given_path, const char *flags)
 				    escaped_path);
 	}
 
+end:
 	elapsed = double_time() - start;
 
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\" }", elapsed);

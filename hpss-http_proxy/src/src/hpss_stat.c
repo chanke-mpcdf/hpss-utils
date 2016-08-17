@@ -77,6 +77,7 @@ do_hpss_stat(struct evbuffer *out_evb, char *escaped_path, int enclosed_json)
 	u64_to_decchar(stat_info.st_size, s64_str);
 	evbuffer_add_printf(out_evb, "\"size\" : \"%s\", ", s64_str);
 	evbuffer_add_printf(out_evb, "\"mode\" : \"%d\", ", stat_info.st_mode);
+
  end:
 	;
 	return rc;
@@ -89,6 +90,7 @@ hpss_stat(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	char *escaped_path;
 	int rc = 0;
+	char first_illegal_flag;
 	double start, elapsed;
 
 	/*
@@ -104,8 +106,16 @@ hpss_stat(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"stat\", ");
+	if ((first_illegal_flag = check_given_flags("", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	rc = do_hpss_stat(out_evb, escaped_path, 0);
 
+end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\" }", elapsed);
 

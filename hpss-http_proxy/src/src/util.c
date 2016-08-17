@@ -243,3 +243,15 @@ int filter_by_mtime(char *escaped_path, int mtime, int older, int newer)
 	}
 	return 0;
 }
+
+char check_given_flags(const char *allowed_flags, const char *given_flags) {
+	const char *c;
+	c = given_flags;
+	while (*c) {
+		if (! strchr(allowed_flags, *c)) {
+			return *c;
+		}
+		c++;
+	}
+	return 0;
+}

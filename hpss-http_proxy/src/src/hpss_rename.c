@@ -15,6 +15,7 @@ hpss_rename(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	char *escaped_path, *escaped_new_path;
 	int rc;
+	char first_illegal_flag;
 	double start, elapsed;
 
 	/*
@@ -38,6 +39,12 @@ hpss_rename(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	evbuffer_add_printf(out_evb, "{");
 	evbuffer_add_printf(out_evb, "\"action\" : \"rename\", ");
+	if ((first_illegal_flag = check_given_flags("", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
 	evbuffer_add_printf(out_evb, "\"new_path\" : \"%s\", ",
 			    escaped_new_path);
@@ -55,6 +62,7 @@ hpss_rename(struct evbuffer *out_evb, char *given_path, const char *flags,
 				    escaped_path, escaped_new_path);
 	}
 
+end:
 	elapsed = double_time() - start;
 
 	if (serverInfo.LogLevel < LL_TRACE)

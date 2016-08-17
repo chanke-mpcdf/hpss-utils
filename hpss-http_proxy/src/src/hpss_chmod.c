@@ -71,6 +71,7 @@ hpss_chmod(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	char *escaped_path;
 	int rc = 0;
+	char first_illegal_flag;
 	struct hpss_chmod_payload payload;
 	double start, elapsed;
 
@@ -93,9 +94,17 @@ hpss_chmod(struct evbuffer *out_evb, char *given_path, const char *flags,
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"chmod\", ");
 
+	if ((first_illegal_flag = check_given_flags("", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	rc = do_hpss_chmod(out_evb, escaped_path, &payload, 0);
 
+end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\" }", elapsed);
 

@@ -14,6 +14,7 @@ int hpss_get_storage_info(struct evbuffer *out_evb, /**< [in] mongoose connectio
 			  const char *flags /** [in] allowed flags "u" */ )
 {
 	int rc, i, j, k;
+	char first_illegal_flag;
 	int already_printed_level = 0;
 	hpss_xfileattr_t attributes;
 	char size_str[64];
@@ -34,6 +35,13 @@ int hpss_get_storage_info(struct evbuffer *out_evb, /**< [in] mongoose connectio
 	}
 
 	evbuffer_add_printf(out_evb, "{");
+	evbuffer_add_printf(out_evb, "\"action\" : \"get_storage_info\", ");
+	if ((first_illegal_flag = check_given_flags("", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 
 	/*
 	 * Get extended attributes of a file
@@ -160,6 +168,7 @@ int hpss_get_storage_info(struct evbuffer *out_evb, /**< [in] mongoose connectio
 	}
 	evbuffer_add_printf(out_evb, " ], ");
 
+end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, " \"elapsed\" : \"%.3f\"}", elapsed);
 

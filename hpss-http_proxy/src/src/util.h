@@ -73,6 +73,7 @@ mode_t get_posix_mode(const char *mode_str);
 char *escape_path(const char *path, const char *flags);
 char *unescape_path(const char *path, const char *flags);
 int filter_by_mtime(char *escaped_path, int mtime, int older, int newer);
+char check_given_flags(const char *allowed_flags, const char *given_flags);
 
 #define have_flag(X) strpbrk(flags,X)
 

@@ -14,6 +14,7 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 {
 
 	int rc;
+	char first_illegal_flag;
 	double start, elapsed;
 	char *escaped_path, *escaped_dest_path;
 
@@ -38,6 +39,12 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 
 	evbuffer_add_printf(out_evb, "{");
 	evbuffer_add_printf(out_evb, "\"action\" : \"link\", ");
+	if ((first_illegal_flag = check_given_flags("sh", flags))) {
+		evbuffer_add_printf(out_evb, " \"errno\" : \"22\", ");
+		evbuffer_add_printf(out_evb,
+			" \"errstr\" : \"Illegal flag %c given.\", ", first_illegal_flag);
+		goto end;
+	}
 	evbuffer_add_printf(out_evb, "\"path\" : \"%s\", ", escaped_path);
 
 	if (!have_flag("s") && !have_flag("h")) {
@@ -77,6 +84,7 @@ hpss_link(struct evbuffer *out_evb, char *given_path, const char *flags,
 			goto end;
 		}
 	}
+
 end:
 	elapsed = double_time() - start;
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\" }", elapsed);
