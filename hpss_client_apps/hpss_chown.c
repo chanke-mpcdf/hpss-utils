@@ -10,7 +10,7 @@ main (int argc, char *argv[])
   char *file;
   char c;
 
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -61,5 +61,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpsschown -u <username> -t <path to keytab> -m <krb5|unix> <path> <uid> <gid>\n");
+	   "Usage: hpsschown [auth-options] <path> <uid> <gid>\n");
+  common_usage();
 }

@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include "hpss_api.h"
+#include "tools.h"
 
 void print_time_string(time_t);
 
@@ -12,7 +13,7 @@ main (int argc, char *argv[])
   hpss_stat_t buf;
   char s64_str[256];
   char c;
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -98,5 +99,6 @@ void print_time_string(time_t ltime) {
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpssstat -u <username> -t <path to keytab> -m <krb5|unix> <hpssobject>\n");
+	   "Usage: hpssstat [auth-options] <hpssobject>\n");
+  common_usage();
 }

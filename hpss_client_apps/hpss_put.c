@@ -35,7 +35,7 @@ main (int argc, char *argv[])
 /*
  * Process arguments
  */
-  while ((arg = getopt (argc, argv, "u:t:m:ac:h?")) != EOF)
+  while ((arg = getopt (argc, argv, "ac:"COMMON_OPTS)) != EOF)
     {
       switch (arg)
 	{
@@ -47,7 +47,7 @@ main (int argc, char *argv[])
 	  break;
 	case 'h':
 	case '?':
-	  usage ();
+	  usage();
 	  exit (0);
 	default:
 	  if (scan_cmdline_authargs (arg, optarg))
@@ -188,6 +188,7 @@ int
 usage ()
 {
   printf
-    ("Usage: hpssput -u <username> -t <path to keytab> -m <krb5|unix> [-a] [-c <cosid>] <dstfl> { <srcfl> | \"-\" } \n");
+    ("Usage: hpssput [auth-options] [-a] [-c <cosid>] <dstfl> { <srcfl> | \"-\" } \n");
   printf ("         where \"-\" indicates reading from standard input\n");
+  common_usage();
 }

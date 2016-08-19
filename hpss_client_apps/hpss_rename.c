@@ -10,7 +10,7 @@ main (int argc, char *argv[])
   char *old, *new;
   char c;
 
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -51,5 +51,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "hpss_rename -u <username> -t <path to keytab> -m <krb5|unix> <old> <new>\n");
+	   "hpss_rename [auth-options] <old> <new>\n");
+  common_usage();
 }

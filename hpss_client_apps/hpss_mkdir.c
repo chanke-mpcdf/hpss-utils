@@ -11,7 +11,7 @@ main (int argc, char *argv[])
   char c;
   char dir[1024], fullPath[1024];
   char *str, *saveptr, *subtoken;
-  while ((c = getopt (argc, argv, "u:t:m:ph?")) != -1)
+  while ((c = getopt (argc, argv, "p"COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -74,5 +74,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpssmkdir [-p] -u <username> -t <path to keytab> -m <krb5|unix> <dir>\n");
+	   "Usage: hpssmkdir [auth-options] [-p] <dir>\n");
+  common_usage();
 }

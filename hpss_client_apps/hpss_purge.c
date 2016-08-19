@@ -51,7 +51,7 @@ main (int argc, char *argv[])
   /*
    * Read in the list of file names, build the full pathnames, and purge
    */
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -173,5 +173,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpsspurge -u <username> -t <path to keytab> -m <krb5|unix> <file> [ <file> ... ]\n");
+	   "Usage: hpsspurge [opther-options] <file> [ <file> ... ]\n");
+  common_usage();
 }

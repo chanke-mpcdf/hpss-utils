@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include "hpss_api.h"
 #include "u_signed64.h"
+#include "tools.h"
 
 #define BUFSIZE (32*1024*1024)
 
@@ -17,7 +18,7 @@ main (int argc, char *argv[])
   u_signed64 size64, count64;
   hpss_fileattr_t attr;
 
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -114,5 +115,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpsscat -u <username> -t <path to keytab> -m <krb5|unix> <srcfl>\n");
+	   "prints contents of an hpss-file to STDOUT.\nUsage: hpsscat [auth-options] <srcfl>\n");
+  common_usage();
 }

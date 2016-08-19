@@ -13,3 +13,4 @@
 #define FILE_PERMS       0666
 #define DIR_PERMS        0777
 #define DATE             "date +\"%T %d %m %Y\""
+#define COMMON_OPTS      "kt:u:Nm:h?"

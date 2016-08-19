@@ -8,7 +8,7 @@ main (int argc, char *argv[])
 {
   int rc;
   char c;
-  while ((c = getopt (argc, argv, "u:t:m:h?")) != -1)
+  while ((c = getopt (argc, argv, COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -47,5 +47,6 @@ main (int argc, char *argv[])
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpssrmdir -u <username> -t <path to keytab> -m <krb5|unix> <dir>\n");
+	   "Usage: hpssrmdir [auth-options] <dir>\n");
+  common_usage();
 }

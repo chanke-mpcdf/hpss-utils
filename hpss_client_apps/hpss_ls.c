@@ -34,7 +34,7 @@ main (argc, argv)
       perror ("malloc");
       exit (1);
     }
-  while ((c = getopt (argc, argv, "u:t:m:lah?")) != -1)
+  while ((c = getopt (argc, argv, "la"COMMON_OPTS)) != -1)
     {
       switch (c)
 	{
@@ -262,5 +262,6 @@ printline (path, name, AttrOut)
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpssls [-al] -u <username> -t <path to keytab> -m <krb5|unix> <dir>\n");
+	   "Usage: hpssls [-al] [auth-options] <dir>\n");
+  common_usage();
 }
