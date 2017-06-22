@@ -14,3 +14,10 @@
 #define DIR_PERMS        0777
 #define DATE             "date +\"%T %d %m %Y\""
 #define COMMON_OPTS      "kt:u:Nm:h?"
+
+/*
+ * required for getopt() on some platforms
+ */
+
+extern char *optarg;
+extern int optind, opterr, optopt;

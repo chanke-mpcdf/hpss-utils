@@ -20,7 +20,7 @@ char *rw_actions =
  * comma are required for the correct parsing. 
  */
 char *all_actions =
-    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,";
+    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,stage,";
 
 /*
  * ! \brief check given actions 
@@ -494,6 +494,23 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	if (!strcmp(action, "stat")) {
 		rc = hpss_stat(out_evb, (char *)path, flags, depth,
 			       older_than, newer_than);
+		goto send_reply;
+	}
+	if (!strcmp(action, "stage")) {
+		int storage_level = 0;
+                qs_param_buf = evhttp_find_header(&query_str_kvq, "storage_level");
+                if (qs_param_buf) {
+                        if (check_qs_param(out_evb, "storage_level", qs_param_buf))
+                                goto send_reply;
+                        storage_level = strtol(qs_param_buf, &end_ptr, 10);
+                        if (check_conversion_to_int
+                            (out_evb, qs_param_buf, end_ptr, "storage_level"))
+                                goto send_reply;
+                } else {
+                        storage_level = 0;
+                }
+
+		rc = hpss_stage(out_evb, (char *)path, flags, storage_level);
 		goto send_reply;
 	}
 

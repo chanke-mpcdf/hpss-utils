@@ -32,3 +32,5 @@ int hpss_del_uda(struct evbuffer *out_evb, char *given_path,
 int hpss_get_to_proxy(struct evbuffer *out_evb,
 		      char *given_path, const char *flags,
 		      char *local_path, char *mode_str);
+int hpss_stage(struct evbuffer *out_evb, char *given_path, const char *flags,
+	  int storage_level);

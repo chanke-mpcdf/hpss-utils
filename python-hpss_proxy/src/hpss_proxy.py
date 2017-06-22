@@ -186,20 +186,20 @@ class HPSS_PROXY:
         else :
             return self.do_action("rm", path, flags=flags)
 
-    def hpss_put_local(self, path, local_path ) :
-        """ put a file local to this script into hpss.
+    def hpss_put_from_proxy(self, path, local_path ) :
+        """ put a file local to this proxy into hpss.
 
             XXX mode_str ?, recursion ?
         """
-        return self.do_action("put_local", path, extra_params = { "local_path": local_path} );
+        return self.do_action("put_from_proxy", path, extra_params = { "local_path": local_path} );
 
-    def hpss_get_to_local(self, path, flags, local_path ) :
+    def hpss_get_to_proxy(self, path, flags, local_path ) :
         """ get a file from hpss and store it locally.
 
             XXX mode_str ?, recursion ?
         """
 
-        return self.do_action("get_to_local", path, flags=flags, extra_params = { "local_path": local_path} );
+        return self.do_action("get_to_proxy", path, flags=flags, extra_params = { "local_path": local_path} );
 
     def hpss_chmod(self, path, flags, mode_str) :
         """ do a chmod on path. mode_str is of form "rwxrwx---"
@@ -226,6 +226,13 @@ class HPSS_PROXY:
             no recursion etc. implemented.
         """
         return self.do_action("stat", path, flags=flags);
+
+    def hpss_stage(self, path, storage_level=0) :
+        """ stage a file. By default to storage-level 0 (disk).
+
+            no recursion etc. implemented.
+        """
+        return self.do_action("stage", path, extra_params={"storage_level": storage_level})
 
     def hpss_get_storage_info(self, path) :
         """ return id of physical volume

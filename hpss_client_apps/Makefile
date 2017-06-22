@@ -28,7 +28,7 @@ POSIXLIB	= -L$(LOCAL_ROOT)/tools/unsupported/lib/ \
 LDFLAGS         = $(COMPFLAGS) $(RUNFLAGS)
 PROG		= hpss_mkdir hpss_rmdir hpss_rm hpss_purge hpss_symlink\
 		  hpss_hardlink hpss_chown hpss_ls hpss_put hpss_cat\
-		  hpss_touch hpss_chmod hpss_stat hpss_rename 
+		  hpss_touch hpss_chmod hpss_stat hpss_stage hpss_rename
 
 all:		$(PROG)
 install:	all
@@ -141,6 +141,10 @@ hpss_posixstat:	hpss_posixstat.o tools.o
 		@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS) $(POSIXLIB) tools.o
 
 hpss_stat:	hpss_stat.o tools.o
+		@echo "Linking $@"...
+		@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS) tools.o
+
+hpss_stage:	hpss_stage.o tools.o
 		@echo "Linking $@"...
 		@$(CC) $@.o -o $@ $(CFLAGS) $(LDFLAGS) $(LIBS) tools.o
 
