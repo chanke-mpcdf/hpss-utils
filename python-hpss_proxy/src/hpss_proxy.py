@@ -139,7 +139,10 @@ class HPSS_PROXY:
         if self.LogLevel <= DEBUG :
             self.LogFile.write("do_action: action=%s : proxy returned data: %s\n" % (action,data))
             self.LogFile.flush()
-        result_obj=json.loads( data)
+        try:
+            result_obj = json.loads(data)
+        except ValueError:
+            raise RuntimeError("Cannot parse as JSON: \"%s\"" % data)
         return result_obj 
 
     def hpss_link(self, path, flags, dest_path) :
