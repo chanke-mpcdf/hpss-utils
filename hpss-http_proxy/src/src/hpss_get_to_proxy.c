@@ -21,7 +21,7 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 	int local_open_mode;
 	char *buf = NULL;
 	char *escaped_path;
-	int read = 0, written = 0, hfd, fd;
+	int read = 0, written = 0, hfd = -1, fd = -1;
 	mode_t posix_mode;
 	u_signed64 count64 = 0, size64 = 0;
 	double start, elapsed, xfer_rate;
@@ -170,10 +170,14 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 	evbuffer_add_printf(out_evb, "\"elapsed\" : \"%.3f\"}", elapsed);
 
 	/*
-	 * Close the files 
+	 * Close the files, if required
 	 */
-	close(fd);
-	hpss_Close(hfd);
+	if (fd > 0) {
+		close(fd);
+	}
+	if (hfd > 0) {
+		hpss_Close(hfd);
+	}
 
 	if (serverInfo.LogLevel <= LL_TRACE)
 		fprintf(serverInfo.LogFile,

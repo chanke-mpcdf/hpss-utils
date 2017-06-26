@@ -20,7 +20,7 @@ hpss_put_from_proxy(struct evbuffer *out_evb, char *given_path,
 	char first_illegal_flag;
 	char *buf;
 	char *escaped_path;
-	int eof, len, written = 0, hfd, fd;
+	int eof, len, written = 0, hfd = -1, fd = -1;
 	mode_t posix_mode;
 	hpss_cos_hints_t hints_in, hints_out;
 	hpss_cos_priorities_t hints_pri;
@@ -143,13 +143,17 @@ hpss_put_from_proxy(struct evbuffer *out_evb, char *given_path,
 		}
 		size64 = add64m(size64, cast64m(len));
 	}
-	/*
-	 * Close the files 
-	 */
-	close(fd);
-	hpss_Close(hfd);
 
  end:
+	/*
+	 * Close the files, if required
+	 */
+	if (fd > 0) {
+		close(fd);
+	}
+	if (hfd > 0) {
+		hpss_Close(hfd);
+	}
 	elapsed = double_time() - start;
 	xfer_rate = ((double)cast32m(div64m(size64, 1024 * 1024))) / elapsed;
 	evbuffer_add_printf(out_evb, "\"xfer_rate\" : \"%.3f\", ", xfer_rate);

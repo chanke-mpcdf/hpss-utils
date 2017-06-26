@@ -55,7 +55,12 @@ do_hpss_stage(struct evbuffer *out_evb, char *escaped_path, int enclosed_json, i
 	}
 
  end:
-	;
+	/*
+	 * Close the files, if required
+	 */
+	if (hfd > 0) {
+		hpss_Close(hfd);
+	}
 	return rc;
 }
 
