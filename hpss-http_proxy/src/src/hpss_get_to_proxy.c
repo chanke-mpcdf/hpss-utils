@@ -139,7 +139,7 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 			goto end;
 		}
 		/*
-		 * Write the data to standard output 
+		 * Write the data to the local file
 		 */
 		written = write(fd, buf, read);
 		if (written != read) {

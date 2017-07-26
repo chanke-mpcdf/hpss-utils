@@ -14,13 +14,13 @@ char uri_root[512];
  * trailing comma are required for the correct parsing. 
  */
 char *rw_actions =
-    ",chmod,chown,del_uda,link,mkdir,put_from_proxy,rename,rm,set_uda,";
+    ",chmod,chown,del_uda,link,mkdir,put_from_proxy,rename,rm,set_uda,purge,purge_lock,";
 /*
  * ! \brief list of all exported methods * * The preceeding and trailing
  * comma are required for the correct parsing. 
  */
 char *all_actions =
-    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,stage,";
+    ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,stage,purge,purge_lock,get_to_client,";
 
 /*
  * ! \brief check given actions 
@@ -513,7 +513,28 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 		rc = hpss_stage(out_evb, (char *)path, flags, storage_level);
 		goto send_reply;
 	}
+	if (!strcmp(action, "purge_lock")) {
+		rc = hpss_purge_lock(out_evb, (char *)path, flags, depth,
+                               older_than, newer_than);
+		goto send_reply;
+	}
+	if (!strcmp(action, "purge")) {
+		int storage_level = 0;
+                qs_param_buf = evhttp_find_header(&query_str_kvq, "storage_level");
+                if (qs_param_buf) {
+                        if (check_qs_param(out_evb, "storage_level", qs_param_buf))
+                                goto send_reply;
+                        storage_level = strtol(qs_param_buf, &end_ptr, 10);
+                        if (check_conversion_to_int
+                            (out_evb, qs_param_buf, end_ptr, "storage_level"))
+                                goto send_reply;
+                } else {
+                        storage_level = 0;
+                }
 
+		rc = hpss_purge(out_evb, (char *)path, flags, storage_level);
+		goto send_reply;
+	}
 	if (!strcmp(action, "link")) {
 		qs_param_buf = evhttp_find_header(&query_str_kvq, "dest_path");
 		if (qs_param_buf) {
@@ -617,6 +638,13 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 		goto send_reply;
 	}
 
+	if (!strcmp(action, "get_to_client")) {
+
+		rc = hpss_get_to_client(out_evb, (char *)path, flags);
+                evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", "application/octet-stream");
+                evhttp_send_reply(req, 200, "OK", out_evb);
+                goto done;
+	}
 	/*
 	 * if we reach this here, we got some unknown action 
 	 */

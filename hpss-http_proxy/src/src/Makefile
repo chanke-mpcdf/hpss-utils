@@ -25,7 +25,8 @@ LDFLAGS         = $(COMPFLAGS) $(RUNFLAGS)
 OBJ		= util.o utf8.o hpss_mkdir.o hpss_chmod.o hpss_rm.o hpss_ls.o \
 		  hpss_put_from_proxy.o hpss_get_to_proxy.o hpss_link.o hpss_stat.o \
 		  hpss_rename.o hpss_set_uda.o hpss_get_storage_info.o hpss_chown.o\
-		  hpss_get_udas.o hpss_del_uda.o hpss_stage.o
+		  hpss_get_udas.o hpss_del_uda.o hpss_stage.o hpss_purge.o\
+		  hpss_get_to_client.o hpss_purge_lock.o
 
 PROG		= hpss-http_proxy
 

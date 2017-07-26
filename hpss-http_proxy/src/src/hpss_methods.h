@@ -34,3 +34,10 @@ int hpss_get_to_proxy(struct evbuffer *out_evb,
 		      char *local_path, char *mode_str);
 int hpss_stage(struct evbuffer *out_evb, char *given_path, const char *flags,
 	  int storage_level);
+int hpss_purge(struct evbuffer *out_evb, char *given_path, const char *flags,
+	  unsigned32 storage_level);
+int hpss_get_to_client(struct evbuffer *out_evb,
+		      char *given_path, const char *flags);
+int hpss_purge_lock(struct evbuffer *out_evb,
+	char *given_path, const char *flags, int max_recursion_level,
+	int older, int newer);
