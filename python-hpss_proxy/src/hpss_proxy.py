@@ -101,14 +101,14 @@ class HPSS_PROXY:
         else:
             return False
 
-    def do_action(self, action, path, flags="", depth=0, older=-1, newer=-1, extra_params=None):
+    def do_action(self, action, path, flags="", depth=0, older=-1, newer=-1, extra_params=None, target_file=None):
         """ actually call the hpss_http_proxy and load the returned json into a result_obj.
 
             throw an error on a http code != 200.
         """
         if extra_params is None:
             extra_params = {}
-        param_dict = {'action': action, 'flags': flags, 'depth': depth, "older" : "%s" % older, "newer" : "%s" % newer}
+        param_dict = {'action' : action, 'flags' : flags, 'depth' : depth, "older" : "%s" % older, "newer" : "%s" % newer}
         param_dict.update(extra_params)
         if self.LogLevel <= DEBUG:
             self.LogFile.write("path=%s, param_dict: %s\n" % (path, param_dict))
@@ -137,15 +137,20 @@ class HPSS_PROXY:
             if self.LogLevel <= ERROR:
                 self.LogFile.write("got response (%d, %s): %s" % (response.status, response.reason, response.read()))
             raise RuntimeError("got response (%d, %s): %s" % (response.status, response.reason, response.read()))
-        data = response.read()
-        if self.LogLevel <= DEBUG:
-            self.LogFile.write("do_action: action=%s: proxy returned data: %s\n" % (action, data))
-            self.LogFile.flush()
-        try:
-            result_obj = json.loads(data)
-        except ValueError:
-            raise RuntimeError("Cannot parse as JSON: \"%s\"" % data)
-        return result_obj
+        if target_file is None:
+            data = response.read()
+            if self.LogLevel <= DEBUG:
+                self.LogFile.write("do_action: action=%s: proxy returned data: %s\n" % (action, data))
+                self.LogFile.flush()
+            try:
+                result_obj = json.loads(data)
+            except ValueError:
+                raise RuntimeError("Cannot parse as JSON: \"%s\"" % data)
+            return result_obj
+        else:
+            with open(target_file, "wb+") as f:
+                f.write(response.read())
+            return
 
     def hpss_link(self, path, flags, dest_path):
         """ create a link within hpss from path to dest_path.
@@ -207,6 +212,14 @@ class HPSS_PROXY:
 
         return self.do_action("get_to_proxy", path, flags=flags, extra_params={"local_path" : local_path})
 
+    def hpss_get_to_client(self, path, target_file):
+        """ get a file from hpss and store it locally on the client.
+
+            XXX mode_str ?, recursion ?
+        """
+
+        return self.do_action("get_to_client", path, target_file=target_file)
+
     def hpss_chmod(self, path, flags, mode_str):
         """ do a chmod on path. mode_str is of form "rwxrwx---"
 
@@ -240,6 +253,20 @@ class HPSS_PROXY:
             no recursion etc. implemented.
         """
         return self.do_action("stage", path, extra_params={"storage_level" : storage_level})
+
+    def hpss_purge(self, path, storage_level=0):
+        """ purge a file. By default from storage-level 0 (disk).
+
+            no recursion etc. implemented.
+        """
+        return self.do_action("purge", path, extra_params={"storage_level" : storage_level})
+
+    def hpss_purge_lock(self, path, flags):
+        """ purge locak or unlock a file.
+
+            no recursion etc. implemented.
+        """
+        return self.do_action("purge_lock", path, flags=flags)
 
     def hpss_get_storage_info(self, path):
         """ return id of physical volume
