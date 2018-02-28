@@ -28,7 +28,8 @@ POSIXLIB	= -L$(LOCAL_ROOT)/tools/unsupported/lib/ \
 LDFLAGS         = $(COMPFLAGS) $(RUNFLAGS)
 PROG		= hpss_mkdir hpss_rmdir hpss_rm hpss_purge hpss_symlink\
 		  hpss_hardlink hpss_chown hpss_ls hpss_put hpss_cat\
-		  hpss_touch hpss_chmod hpss_stat hpss_stage hpss_rename
+		  hpss_touch hpss_chmod hpss_stat hpss_stage hpss_rename\
+		  hpss_posixstat
 
 all:		$(PROG)
 install:	all
