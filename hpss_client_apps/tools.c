@@ -71,8 +71,14 @@ authenticate ()
       exit(-1);
     }
 
+  if(PathToKeytab && !Keytab) { 
+      fprintf(stderr, "keytab specified, forcing -k\n");
+      Keytab++;
+      newCredential++;
+  }
+
   if(newCredential && (MechType == hpss_authn_mech_krb5) && !Keytab) {
-    printf("new login credential for krb5 is not supported\n\n");
+    printf("new login credential without keytab for krb5 is not supported\n\n");
     common_usage();
     exit(-1);
   }
