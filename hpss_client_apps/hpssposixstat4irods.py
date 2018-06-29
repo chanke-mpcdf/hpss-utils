@@ -31,7 +31,7 @@ if len(args) != 1 :
     sys.exit(1)
 filename=args[0]
 
-subproc=subprocess.Popen(["/opt/hpss/examples/hpss_posixstat", "-u", "%s" % Username, "-t", "%s" % Keytab, "%s" % filename],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+subproc=subprocess.Popen(["/opt/hpss/examples/hpss_posixstat", "-u", "%s" % Username, "-k", "-t", "%s" % Keytab, "%s" % filename],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 (stdoutdata, stderrdata)=subproc.communicate()
 
 if subproc.returncode != 0 :
