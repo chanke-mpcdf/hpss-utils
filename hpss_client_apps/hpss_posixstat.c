@@ -52,9 +52,9 @@ main(
         printf("uid          : %u\n", buf.st_uid);
         printf("gid          : %u\n", buf.st_gid);
         printf("dev type     : %u\n", buf.st_rdev);
-        printf("size         : %lld\n", buf.st_size);
-        printf("blksize      : %lld\n", buf.st_blksize);
-        printf("blocks       : %lld\n", buf.st_blocks);
+        printf("size         : %lld\n", (long long) buf.st_size);
+        printf("blksize      : %ld\n", (long) buf.st_blksize);
+        printf("blocks       : %lld\n", (long long) buf.st_blocks);
         printf("access time  : %s", ctime(&buf.st_atime));
         printf("modify time  : %s", ctime(&buf.st_mtime));
         printf("change time  : %s", ctime(&buf.st_ctime));
@@ -65,6 +65,6 @@ main(
 usage ()
 {
   fprintf (stderr,
-	   "Usage: hpss_posixstatt [auth-options] <hpssobject>\n");
+	   "Usage: hpss_posixstat [auth-options] <hpssobject>\n");
   common_usage();
 }

@@ -64,8 +64,8 @@ main (int argc, char *argv[])
   print_time_string((time_t) buf.hpss_st_mtime);
   printf("change time  : ");
   print_time_string((time_t) buf.hpss_st_ctime);
-  printf ("blksize      : %u\n", buf.st_blksize);
-  printf ("blocks       : %u\n", buf.st_blocks);
+  printf ("blksize      : %lld\n", (long long) buf.st_blksize);
+  printf ("blocks       : %lld\n", (long long) buf.st_blocks);
   printf ("vfstype      : %d\n", buf.st_vfstype);
   printf ("vfs          : %u\n", buf.st_vfs);
   printf ("vnode type   : %u\n", buf.st_type);
