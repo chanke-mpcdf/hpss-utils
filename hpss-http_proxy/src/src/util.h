@@ -40,7 +40,7 @@
  * ! \def MAX_QS_VALUE_LEN \brief Maximum length of an querystring
  * parameter-value 
  */
-#define MAX_QS_VALUE_LEN 256
+#define MAX_QS_VALUE_LEN 2048
 
 /*
  * ! \def MIN_ALLOWED_CHAR \brief Mnimum ord-number of a char in the
