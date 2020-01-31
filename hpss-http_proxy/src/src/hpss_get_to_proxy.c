@@ -54,7 +54,7 @@ hpss_get_to_proxy(struct evbuffer *out_evb, char *given_path,
 	 * see if local file already exists 
 	 */
 	if (lstat(local_path, &stat_info) >= 0) {	/* is at least link */
-		if (!have_flag("f")) {	/* fail if force flag is not given */
+		if (!have_flag("f") && !have_flag("a")) {	/* fail if force flag and we do not append is not given */
 			evbuffer_add_printf(out_evb, "\"errno\" : \"17\", ");
 			evbuffer_add_printf(out_evb,
 					    "\"errstr\" : \"local_path=%s already exists.\", ",
