@@ -63,6 +63,18 @@ typedef struct {
 	char *uda_prefix;
 } serverInfo_t;
 
+struct chunk_req_state {
+	struct event_base *base;
+	struct evhttp_request *req;
+	struct event *timer;
+	char *escaped_path;
+        int hfd;
+        u_signed64 size64;
+        u_signed64 count64;
+	int buffer_size;
+        char *data_buf;
+};
+
 serverInfo_t serverInfo;
 
 int authenticate(char *UserName, char *PathToKeytab, char *AuthMech);

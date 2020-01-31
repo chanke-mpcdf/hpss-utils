@@ -11,19 +11,19 @@ char uri_root[512];
 
 /*
  * ! \brief list of methods which need RW access * * The preceeding and
- * trailing comma are required for the correct parsing. 
+ * trailing comma are required for the correct parsing.
  */
 char *rw_actions =
     ",chmod,chown,del_uda,link,mkdir,put_from_proxy,rename,rm,set_uda,purge,purge_lock,";
 /*
  * ! \brief list of all exported methods * * The preceeding and trailing
- * comma are required for the correct parsing. 
+ * comma are required for the correct parsing.
  */
 char *all_actions =
     ",chmod,chown,del_uda,get_to_proxy,get_storage_info,get_udas,link,ls,mkdir,put_from_proxy,rename,rm,set_uda,stat,stage,purge,purge_lock,get_to_client,";
 
 /*
- * ! \brief check given actions 
+ * ! \brief check given actions
  */
 void check_and_init_actions(char **serverInfo_actions, char *given_actions)
 {
@@ -34,12 +34,12 @@ void check_and_init_actions(char **serverInfo_actions, char *given_actions)
 	strcat(*serverInfo_actions, given_actions);
 	strcat(*serverInfo_actions, ",");
 	/*
-	 * strtok destroys string, so make a copy of it 
+	 * strtok destroys string, so make a copy of it
 	 */
 	tmp_str = malloc(strlen(given_actions) + 4);
 	strcpy(tmp_str, *serverInfo_actions);
 	/*
-	 * need to check that given actions are in all_actions 
+	 * need to check that given actions are in all_actions
 	 */
 	ptr = strtok(tmp_str, ",");
 	while (ptr != NULL) {
@@ -64,7 +64,7 @@ void check_and_init_actions(char **serverInfo_actions, char *given_actions)
 }
 
 /*
- * check that a qs-param has only chars of a safe range 
+ * check that a qs-param has only chars of a safe range
  */
 int
 is_unsafe_param(struct evbuffer *out_evb, const char *key, const char *value)
@@ -86,7 +86,7 @@ LOG_RETURN_INT(0)}
 
 /*
  * ! return HTTP-Code 200 if a (mandatory) variable was not included in
- * the command. 
+ * the command.
  */
 int check_qs_param(struct evbuffer *out_evb, const char *key, const char *value)
 {
@@ -116,7 +116,7 @@ int check_qs_param(struct evbuffer *out_evb, const char *key, const char *value)
 	}
 
 	/*
-	 * check for ascii 
+	 * check for ascii
 	 */
 	if (is_unsafe_param(out_evb, key, value)) {
 	LOG_RETURN_INT(1)}
@@ -124,7 +124,7 @@ LOG_RETURN_INT(0)}
 
     /*
      * ! \brief safely convert a string into an int. * Return
-     * HTTP-Error 200 on failure. 
+     * HTTP-Error 200 on failure.
      */
 int
 check_conversion_to_int(struct evbuffer *out_evb,
@@ -178,9 +178,9 @@ check_conversion_to_int(struct evbuffer *out_evb,
 
   /*
    * This callback gets invoked when we get any http request that
-   * doesn't match any other callback.  Like any evhttp server callback, 
-   * it has a simple job: it must eventually call evhttp_send_error() or 
-   * evhttp_send_reply(). 
+   * doesn't match any other callback.  Like any evhttp server callback,
+   * it has a simple job: it must eventually call evhttp_send_error() or
+   * evhttp_send_reply().
    */
 static void dispatcher(struct evhttp_request *req, void *arg)
 {
@@ -211,7 +211,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	}
 
 	/*
-	 * This holds the content we're sending. 
+	 * This holds the content we're sending.
 	 */
 	out_evb = evbuffer_new();
 
@@ -220,7 +220,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 			uri);
 
 	/*
-	 * Decode the URI 
+	 * Decode the URI
 	 */
 	decoded = evhttp_uri_parse(uri);
 	if (!decoded) {
@@ -232,14 +232,14 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	}
 
 	/*
-	 * Let's see what path the user asked for. 
+	 * Let's see what path the user asked for.
 	 */
 	path = evhttp_uri_get_path(decoded);
 	if (!path)
 		path = "/";
 
 	/*
-	 * We need to decode it, to see what path the user really wanted. 
+	 * We need to decode it, to see what path the user really wanted.
 	 */
 	decoded_path = evhttp_uridecode(path, 0, NULL);
 	if (decoded_path == NULL)
@@ -248,7 +248,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 		fprintf(serverInfo.LogFile, "Got path %s\n", decoded_path);
 
 	/*
-	 * parse query_string 
+	 * parse query_string
 	 */
 	qs = evhttp_uri_get_query(decoded);
 	if (qs) {
@@ -296,7 +296,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	}
 
 	/*
-	 * return HTTP-Code 200 and rc=1 if we call an illegal action 
+	 * return HTTP-Code 200 and rc=1 if we call an illegal action
 	 */
 	if ((serverInfo.forbidden_actions
 	     && (strstr(serverInfo.forbidden_actions, comma_action) !=
@@ -319,7 +319,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	}
 
 	/*
-	 * flags parameter 
+	 * flags parameter
 	 */
 	qs_param_buf = evhttp_find_header(&query_str_kvq, "flags");
 	if (qs_param_buf) {
@@ -330,7 +330,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	}
 
 	/*
-	 * get optional parameters 
+	 * get optional parameters
 	 */
 	qs_param_buf = evhttp_find_header(&query_str_kvq, "depth");
 	if (qs_param_buf) {
@@ -395,7 +395,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 	 */
 
 	/*
-	 * dispatch to libhpss 
+	 * dispatch to libhpss
 	 */
 
 	if (!strcmp(action, "ls")) {
@@ -630,7 +630,7 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 			strncpy(other_path, qs_param_buf, MAX_QS_VALUE_LEN);
 		} else {
 			evbuffer_add_printf(out_evb,
-					    "{ \"errstr\" : \"parameter new_path missing\", \"errno\" : \"2\" ");
+					    "{ \"errstr\" : \"parameter local_path missing\", \"errno\" : \"2\" ");
 			goto send_reply;
 		}
 		rc = hpss_get_to_proxy(out_evb, (char *)path, flags,
@@ -640,13 +640,31 @@ static void dispatcher(struct evhttp_request *req, void *arg)
 
 	if (!strcmp(action, "get_to_client")) {
 
-		rc = hpss_get_to_client(out_evb, (char *)path, flags);
-                evhttp_add_header(evhttp_request_get_output_headers(req), "Content-Type", "application/octet-stream");
-                evhttp_send_reply(req, 200, "OK", out_evb);
+		struct chunk_req_state *state = malloc(sizeof(struct chunk_req_state));
+		int buffer_size = 32*1024;
+                qs_param_buf = evhttp_find_header(&query_str_kvq, "buffer_size");
+                if (qs_param_buf) {
+                        buffer_size = strtol(qs_param_buf, &end_ptr, 10);
+                        if (check_conversion_to_int
+                            (out_evb, qs_param_buf, end_ptr, "buffer_size"))
+                                goto send_reply;
+                } else {
+                        buffer_size = 32*1024;
+                }
+
+		memset(state, 0, sizeof(struct chunk_req_state));
+		state->req = req;
+		state->base = arg;
+		state->buffer_size = buffer_size;
+		state->timer = evtimer_new(state->base, http_chunked_trickle_cb, state);
+		evhttp_send_reply_start(req, HTTP_OK, "OK");
+                /* open file and schedule the trickle */
+		hpss_get_to_client(state, (char *) path, flags);
+
                 goto done;
 	}
 	/*
-	 * if we reach this here, we got some unknown action 
+	 * if we reach this here, we got some unknown action
 	 */
 	evhttp_send_error(req, HTTP_BADREQUEST, 0);
 
@@ -708,7 +726,7 @@ int main(int argc, char **argv)
         serverInfo.LogLevel = LL_INFO;
 
 	/*
-	 * command line parsing 
+	 * command line parsing
 	 */
 	while ((c = getopt(argc, argv, "a:f:u:t:m:p:l:L:P:h?URs")) != -1) {
 		switch (c) {
@@ -829,12 +847,12 @@ int main(int argc, char **argv)
 	fflush(serverInfo.LogFile);
 
 	/*
-	 * authenticate to HPSS 
+	 * authenticate to HPSS
 	 */
 	authenticate(UserName, PathToKeytab, AuthMech);
 
 	/*
-	 * startup libevent 
+	 * startup libevent
 	 */
 
 	base = event_base_new();
@@ -845,7 +863,7 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Create a new evhttp object to handle requests. 
+	 * Create a new evhttp object to handle requests.
 	 */
 	http = evhttp_new(base);
 	if (!http) {
@@ -854,10 +872,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	evhttp_set_gencb(http, dispatcher, NULL);
+	evhttp_set_gencb(http, dispatcher, base);
 
 	/*
-	 * Now we tell the evhttp what port to listen on 
+	 * Now we tell the evhttp what port to listen on
 	 */
 	handle = evhttp_bind_socket_with_handle(http, "0.0.0.0", port);
 	if (!handle) {
@@ -867,5 +885,7 @@ int main(int argc, char **argv)
 	}
 
 	event_base_dispatch(base);
+        evhttp_free(http);
+	event_base_free(base);
 	return 0;
 }

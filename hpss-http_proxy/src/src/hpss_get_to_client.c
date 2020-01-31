@@ -1,156 +1,167 @@
-/*!\file 
+/*!\file
 *\brief read a file from HPSS and upload it to the client
 */
 #include <unistd.h>
 
 /*
- * helper 
+ * helper
  */
 #include "util.h"
 #include "hpss_methods.h"
 
-#define BUFSIZE (32*1024*1024)
+void end_connection(struct chunk_req_state *state) {
+	evhttp_send_reply_end(state->req);
+	event_free(state->timer);
+	if (state->hfd > 0) {
+		hpss_Close(state->hfd);
+	}
 
+        /*
+         * free buffer, if allocation was successful
+         */
+        if (state->data_buf)
+            free(state->data_buf);
+	if (state->escaped_path)
+	    free(state->escaped_path);
 
-void fail(struct evbuffer *out_evb, int rc, char *errstr, ...) {
+	free(state);
+}
+
+void
+schedule_trickle(struct chunk_req_state *state, int ms)
+{
+        struct timeval tv;
+        tv.tv_sec = 0;
+        tv.tv_usec = ms * 1000;
+        // XXX TODO why no base argument in evtimer_add? well, because it was already given in evtimer_new!
+        evtimer_add(state->timer, &tv);
+}
+
+void fail(struct chunk_req_state *state, int rc, char *errstr, ...) {
+	struct evbuffer *response_buf = evbuffer_new();
         va_list a_list;
+
         va_start(a_list, *errstr);
-	evbuffer_add_printf(out_evb, "{ \"action\" : \"get_to_client\", ");
-	evbuffer_add_printf(out_evb, " \"errno\" : \"%d\", ", rc);
-	evbuffer_add_printf(out_evb, " \"errstr\" : \"");
-        evbuffer_add_vprintf(out_evb, errstr, a_list);
-        evbuffer_add_printf(out_evb, "\" } ");
+        evbuffer_add_printf(response_buf, "{ \"action\" : \"get_to_client\", \"errno\" : \"%d\",  \"errstr\" : \"", rc);
+        evbuffer_add_vprintf(response_buf, errstr, a_list);
+        evbuffer_add_printf(response_buf, "\" } ");
 	fprintf(serverInfo.LogFile, "hpss_get_to_client failed with rc=%d, msg=", rc);
         vfprintf(serverInfo.LogFile, errstr, a_list);
         fprintf(serverInfo.LogFile, "\n");
+        evhttp_send_reply_chunk(state->req, response_buf);
+        evbuffer_free(response_buf);
+        end_connection(state);
+}
+
+void
+http_chunked_trickle_cb(evutil_socket_t fd, short events, void *arg)
+{
+        struct chunk_req_state *state = arg;
+        struct evbuffer *chunk_evb = evbuffer_new();
+	int read = 0;
+
+	read = hpss_Read(state->hfd, state->data_buf, state->buffer_size);
+	if (read <= 0) {
+		fail(state, read, "Cannot read from hpss-file: %s. Got rc=%d.", state->escaped_path, read);
+		return;
+	}
+	if (serverInfo.LogLevel <= LL_DEBUG) {
+		fprintf(serverInfo.LogFile, "%s:%d:: read %d bytes\n",
+			__FILE__, __LINE__, read);
+		fprintf(serverInfo.LogFile, "state->count64=%lu, state->size64=%lu\n", state->count64, state->size64);
+		fflush(serverInfo.LogFile);
+	}
+	state->count64 = add64m(state->count64, cast64m(read));
+
+	/*
+	 * Write the data to the output buffer
+	 */
+
+        evbuffer_add(chunk_evb, state->data_buf, read);
+        evhttp_send_reply_chunk(state->req, chunk_evb);
+        evbuffer_free(chunk_evb);
+        if (state->count64 == state->size64) {
+		return;
+        } else {
+		schedule_trickle(state, 0);
+	}
 }
 
 int
-hpss_get_to_client(struct evbuffer *out_evb, char *given_path,
+hpss_get_to_client(struct chunk_req_state *state, char *given_path,
 		  const char *flags)
 {
 
 	int rc = 0;
 	char first_illegal_flag;
-	char *buf = NULL;
 	char *escaped_path;
-	int read = 0, hfd = -1;
-	u_signed64 count64 = 0, size64 = 0;
-	double start, elapsed, xfer_rate;
 	hpss_fileattr_t Attr;
 
-	/*
-	 * initialize 
-	 */
-	start = double_time();
-	escaped_path = escape_path(given_path, flags);
 
-	if (serverInfo.LogLevel <= LL_TRACE) {
+	/*
+	 * initialize
+	 */
+	escaped_path = escape_path(given_path, flags);
+	state->escaped_path = (char *) malloc(strlen(escaped_path) + 1);
+
+        strncpy(state->escaped_path, (const char *)escaped_path, strlen(escaped_path)+1);
+	if (serverInfo.LogLevel <= LL_DEBUG) {
 		fprintf(serverInfo.LogFile,
-			"%s:%d:: entering hpss_get_to_client with escaped_path=%s\n",  
-			__FILE__, __LINE__, escaped_path);
+			"%s:%d:: entering hpss_get_to_client with escaped_path=%s and buffer_size=%d\n",
+			__FILE__, __LINE__, state->escaped_path, state->buffer_size);
 		fflush(serverInfo.LogFile);
 	}
 
 	if ((first_illegal_flag = check_given_flags("", flags))) {
                 rc = 22;
-                fail(out_evb, rc, "Illegal flag %c given." , first_illegal_flag);
+                fail(state, rc, "Illegal flag %c given." , first_illegal_flag);
 		goto end;
 	}
 	/*
-	 * Get the length of the source file 
+	 * Get the length of the source file
 	 */
         rc = hpss_FileGetAttributes(escaped_path, &Attr);
 	if (rc) {
-		fail(out_evb, rc, "cannot stat hpss-path %s.", escaped_path); 
-		goto end;
-	}
-
-	size64 = Attr.Attrs.DataLength;
-
-	/*
-	 * Allocate the data buffer 
-	 */
-	buf = (char *)malloc(BUFSIZE);
-	if (buf == NULL) {
-		rc = 12;
-		fail(out_evb, rc, "malloc error. The dungeon collapses.");
+		fail(state, rc, "Cannot stat hpss-path %s.", escaped_path);
 		goto end;
 	}
 
 	/*
-	 * Open the HPSS file 
+	 * Allocate the data buffer
 	 */
 
-	hfd = hpss_Open(escaped_path, O_RDONLY, 0, NULL, NULL, NULL);
-	if (hfd < 0) {
+	state->size64 = Attr.Attrs.DataLength;
+
+	/*
+	 * Open the HPSS file
+	 */
+
+	state->hfd = hpss_Open(escaped_path, O_RDONLY, 0, NULL, NULL, NULL);
+	if (state->hfd < 0) {
                 rc = errno;
-                fail(out_evb, rc, "cannot open hpss-path %s.", escaped_path);
+                fail(state, rc, "Cannot open hpss-path %s.", escaped_path);
 		goto end;
 	}
 
 	/*
-	 * Copy the src file to the dst file 
+	 * Copy the src file to the dst file
 	 */
 
-	while ((lt64m(count64, size64)) || (count64 == 0)) {
-		/*
-		 * Read in the next chunk of data 
-		 */
-		read = hpss_Read(hfd, buf, BUFSIZE);
-		if (read <= 0) {
-			rc = 5;
-			fail(out_evb, rc, "Cannot read from hpss-path %s.", escaped_path);
-			goto end;
-		}
-		/*
-		 * Write the data to the output buffer 
-		 */
-		rc = evbuffer_add(out_evb, buf, read);
-		if (rc == -1) {
-			rc = 5;
-			fail(out_evb, rc, "Failed writing to client.");
-			goto end;
-		}
-		count64 = add64m(count64, cast64m(read));
-		if (serverInfo.LogLevel <= LL_TRACE) {
-			fprintf(serverInfo.LogFile, "%s:%d:: read %d bytes\n",
-				__FILE__, __LINE__, read);
-		}
-	}
 	if (serverInfo.LogLevel <= LL_DEBUG) {
-		fprintf(serverInfo.LogFile,
-			"%s:%d:: hpss_get(\"%s\") read %d bytes\n", __FILE__,
-			__LINE__, escaped_path, read);
+			fprintf(serverInfo.LogFile, "%s:%d:: should read %lu bytes\n",
+				__FILE__, __LINE__, state->size64);
 	}
 
- end:
-	elapsed = double_time() - start;
-	xfer_rate = ((double)cast32m(div64m(size64, 1024 * 1024))) / elapsed;
-
-	/*
-	 * Close the files, if required
-	 */
-	if (hfd > 0) {
-		hpss_Close(hfd);
-	}
 
 	if (serverInfo.LogLevel <= LL_TRACE)
 		fprintf(serverInfo.LogFile,
-			"%s:%d:: Leaving method with with rc=%d, elapsed=%.3f, xfer_rate=%.3f\n",
-			__FILE__, __LINE__, rc, elapsed, xfer_rate);
-	fflush(serverInfo.LogFile);
+			"%s:%d:: Timer scheduled.\n",
+			__FILE__, __LINE__);
 
-	/*
-	 * free if we do have an escaped path 
-	 */
-	if (escaped_path != given_path)
-		free(escaped_path);
-        /*
-         * free buffer, if allocation was successful
-         */
-        if (buf)
-            free(buf);
+        state->data_buf = (char *) malloc(state->buffer_size);
+	schedule_trickle(state, 0);
+end:
+	fflush(serverInfo.LogFile);
 
 	return rc;
 }

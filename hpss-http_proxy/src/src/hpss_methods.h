@@ -36,8 +36,10 @@ int hpss_stage(struct evbuffer *out_evb, char *given_path, const char *flags,
 	  int storage_level);
 int hpss_purge(struct evbuffer *out_evb, char *given_path, const char *flags,
 	  unsigned32 storage_level);
-int hpss_get_to_client(struct evbuffer *out_evb,
-		      char *given_path, const char *flags);
 int hpss_purge_lock(struct evbuffer *out_evb,
 	char *given_path, const char *flags, int max_recursion_level,
 	int older, int newer);
+
+void http_chunked_trickle_cb(evutil_socket_t fd, short events, void *arg);
+int hpss_get_to_client(struct chunk_req_state *state, char *given_path,
+                  const char *flags);
