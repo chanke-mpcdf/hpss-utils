@@ -702,6 +702,11 @@ int main(int argc, char **argv)
 	char *PathToLogFile = NULL;
 	char *allowed_actions = NULL, *forbidden_actions = NULL;
 
+        /*
+         * setup defaults
+         */
+        serverInfo.LogLevel = LL_INFO;
+
 	/*
 	 * command line parsing 
 	 */
