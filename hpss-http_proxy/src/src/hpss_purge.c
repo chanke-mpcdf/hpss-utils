@@ -54,7 +54,7 @@ do_hpss_purge(struct evbuffer *out_evb, char *escaped_path, int enclosed_json, u
 		rc = 400;
                 goto end;
 	} else { 
-	evbuffer_add_printf(out_evb, "\"bytes_purged\" : \"%lu\"",
+	evbuffer_add_printf(out_evb, "\"bytes_purged\" : \"%lu\", ",
 		bytes_purged);
                 
         }
