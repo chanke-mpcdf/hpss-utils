@@ -54,8 +54,6 @@ do_hpss_ls(struct evbuffer *out_evb, char *escaped_path,
 	evbuffer_add_printf(out_evb, "\"path\" : \"%s\" ", unescaped_path);
 
 	if (have_flag("l")) {
-		fprintf(serverInfo.LogFile, "%s:%d:: CHECKPOINT\n", __FILE__,
-			__LINE__);
 		fflush(serverInfo.LogFile);
 		rc = print_attributes(out_evb, unescaped_path, AttrOut, flags);
 		if (rc) {
